@@ -3,7 +3,8 @@
 # Optional data source - only run if the metastore exists
 data "databricks_metastore" "this" {
   count  = var.metastore_exists ? 1 : 0
-  region = var.region
+  #region = var.region
+  name   = "${var.region}-metastore"
 }
 
 resource "databricks_metastore" "this" {

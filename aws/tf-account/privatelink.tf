@@ -97,39 +97,39 @@ data "aws_iam_policy_document" "s3_vpc_endpoint_policy" {
     }
   }
 
-  statement {
-    sid    = "Grant access to Unity Catalog Workspace Catalog Bucket"
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:GetObjectVersion",
-      "s3:PutObject",
-      "s3:DeleteObject",
-      "s3:ListBucket",
-      "s3:GetBucketLocation"
-    ]
+  # statement {
+  #   sid    = "Grant access to Unity Catalog Workspace Catalog Bucket"
+  #   effect = "Allow"
+  #   actions = [
+  #     "s3:GetObject",
+  #     "s3:GetObjectVersion",
+  #     "s3:PutObject",
+  #     "s3:DeleteObject",
+  #     "s3:ListBucket",
+  #     "s3:GetBucketLocation"
+  #   ]
 
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
+  #   principals {
+  #     type        = "AWS"
+  #     identifiers = ["*"]
+  #   }
 
-    resources = [
-      "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}/*",
-      "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}"
-    ]
+  #   resources = [
+  #     "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}/*",
+  #     "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}"
+  #   ]
 
-    condition {
-      test     = "StringEquals"
-      variable = "aws:PrincipalAccount"
-      values   = [var.aws_account_id]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "s3:ResourceAccount"
-      values   = [var.aws_account_id]
-    }
-  }
+  #   condition {
+  #     test     = "StringEquals"
+  #     variable = "aws:PrincipalAccount"
+  #     values   = [var.aws_account_id]
+  #   }
+  #   condition {
+  #     test     = "StringEquals"
+  #     variable = "s3:ResourceAccount"
+  #     values   = [var.aws_account_id]
+  #   }
+  # }
 
   statement {
     sid    = "Grant access to Databricks Artifact Buckets"

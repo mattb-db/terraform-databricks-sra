@@ -1,3 +1,48 @@
+variable "credentials_id" {
+  description = "ID of the credentials."
+  type        = string
+}
+
+variable "storage_configuration_id" {
+  description = "ID of the storage configuration."
+  type        = string
+}
+
+variable "network_id" {
+  description = "ID of the network."
+  type        = string
+}
+
+variable "private_access_settings_id" {
+  description = "ID of the private access settings."
+  type        = string
+}
+
+variable "managed_services_customer_managed_key_id" {
+  description = "ID of the managed services customer managed key."
+  type        = string
+}
+
+variable "storage_customer_managed_key_id" {
+  description = "ID of the storage customer managed key."
+  type        = string
+}
+
+variable "network_policy_id" {
+  description = "ID of the network policy."
+  type        = string
+}
+
+variable "network_connectivity_configuration_id" {
+  description = "ID of the network connectivity configuration."
+  type        = string
+}
+
+variable "metastore_id" {
+  description = "ID of the metastore."
+  type        = string
+}
+
 variable "admin_user" {
   description = "Email of the admin user for the workspace and workspace catalog."
   type        = string
@@ -96,6 +141,12 @@ variable "databricks_account_id" {
   description = "ID of the Databricks account."
   type        = string
   sensitive   = true
+}
+
+variable "workspace_host" {
+  description = "Databricks workspace host URL"
+  type        = string
+  default     = null
 }
 
 variable "databricks_gov_shard" {

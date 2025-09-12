@@ -1,22 +1,22 @@
-variable "backend_relay" {
-  description = "ID of the backend relay API interface endpoint."
-  type        = string
-}
+# variable "backend_relay" {
+#   description = "ID of the backend relay API interface endpoint."
+#   type        = string
+# }
 
-variable "backend_rest" {
-  description = "ID of the backend rest API interface endpoint."
-  type        = string
-}
+# variable "backend_rest" {
+#   description = "ID of the backend rest API interface endpoint."
+#   type        = string
+# }
 
-variable "bucket_name" {
-  description = "Name of the root S3 bucket for the workspace."
-  type        = string
-}
+# variable "bucket_name" {
+#   description = "Name of the root S3 bucket for the workspace."
+#   type        = string
+# }
 
-variable "cross_account_role_arn" {
-  description = "AWS ARN of the cross-account role."
-  type        = string
-}
+# variable "cross_account_role_arn" {
+#   description = "AWS ARN of the cross-account role."
+#   type        = string
+# }
 
 variable "databricks_account_id" {
   description = "ID of the Databricks account."
@@ -30,15 +30,15 @@ variable "deployment_name" {
   nullable    = true
 }
 
-variable "managed_services_key" {
-  description = "CMK for managed services."
-  type        = string
-}
+# variable "managed_services_key" {
+#   description = "CMK for managed services."
+#   type        = string
+# }
 
-variable "managed_services_key_alias" {
-  description = "CMK for managed services alias."
-  type        = string
-}
+# variable "managed_services_key_alias" {
+#   description = "CMK for managed services alias."
+#   type        = string
+# }
 
 variable "network_policy_id" {
   description = "Network policy ID for serverless compute."
@@ -60,27 +60,57 @@ variable "resource_prefix" {
   type        = string
 }
 
-variable "security_group_ids" {
-  description = "Security group ID"
-  type        = list(string)
-}
+# variable "security_group_ids" {
+#   description = "Security group ID"
+#   type        = list(string)
+# }
 
-variable "subnet_ids" {
-  description = "List of private subnet IDs"
-  type        = list(string)
-}
+# variable "subnet_ids" {
+#   description = "List of private subnet IDs"
+#   type        = list(string)
+# }
 
-variable "vpc_id" {
-  description = "VPC ID"
+# variable "vpc_id" {
+#   description = "VPC ID"
+#   type        = string
+# }
+
+# variable "workspace_storage_key" {
+#   description = "CMK for workspace storage."
+#   type        = string
+# }
+
+# variable "workspace_storage_key_alias" {
+#   description = "CMK for workspace storage alias."
+#   type        = string
+# }
+
+variable "credentials_id" {
+  description = "Credentials ID."
   type        = string
 }
 
-variable "workspace_storage_key" {
-  description = "CMK for workspace storage."
+variable "storage_configuration_id" {
+  description = "Storage configuration ID."
   type        = string
 }
 
-variable "workspace_storage_key_alias" {
-  description = "CMK for workspace storage alias."
+variable "network_id" {
+  description = "Network ID."
+  type        = string
+}
+
+variable "private_access_settings_id" {
+  description = "Private access settings ID."
+  type        = string
+}
+
+variable "managed_services_customer_managed_key_id" {
+  description = "Managed services customer managed key ID."
+  type        = string
+}
+
+variable "storage_customer_managed_key_id" {
+  description = "Storage customer managed key ID."
   type        = string
 }
