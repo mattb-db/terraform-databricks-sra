@@ -119,24 +119,24 @@ module "log_delivery" {
 # =============================================================================
 
 # Creates a Workspace Isolated Catalog
-# module "unity_catalog_catalog_creation" {
-#   source = "./modules/databricks_workspace/unity_catalog_catalog_creation"
-#   providers = {
-#     databricks = databricks.created_workspace
-#   }
+module "unity_catalog_catalog_creation" {
+  source = "./modules/databricks_workspace/unity_catalog_catalog_creation"
+  providers = {
+    databricks = databricks.created_workspace
+  }
 
-#   aws_account_id               = var.aws_account_id
-#   aws_iam_partition            = local.computed_aws_partition
-#   aws_assume_partition         = local.assume_role_partition
-#   unity_catalog_iam_arn        = local.unity_catalog_iam_arn
-#   resource_prefix              = var.resource_prefix
-#   uc_catalog_name              = "${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}"
-#   cmk_admin_arn                = var.cmk_admin_arn == null ? "arn:${local.computed_aws_partition}:iam::${var.aws_account_id}:root" : var.cmk_admin_arn
-#   workspace_id                 = module.databricks_mws_workspace.workspace_id
-#   user_workspace_catalog_admin = var.admin_user
+  aws_account_id               = var.aws_account_id
+  aws_iam_partition            = local.computed_aws_partition
+  aws_assume_partition         = local.assume_role_partition
+  unity_catalog_iam_arn        = local.unity_catalog_iam_arn
+  resource_prefix              = var.resource_prefix
+  uc_catalog_name              = "${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}"
+  cmk_admin_arn                = var.cmk_admin_arn == null ? "arn:${local.computed_aws_partition}:iam::${var.aws_account_id}:root" : var.cmk_admin_arn
+  workspace_id                 = module.databricks_mws_workspace.workspace_id
+  user_workspace_catalog_admin = var.admin_user
 
-#   depends_on = [module.unity_catalog_metastore_assignment]
-# }
+  depends_on = [module.unity_catalog_metastore_assignment]
+}
 
 # System Table Schemas Enablement
 module "system_table" {
