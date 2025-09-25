@@ -1,29 +1,37 @@
+# =============================================================================
+# Databricks Workspace Resources
+# Rights assignment
+# Clusters
+# Policies
+# Groups
+# =============================================================================
 
-
-
-# User Workspace Assignment (Admin)
-module "user_assignment" {
-  source = "./modules/databricks_account/user_assignment"
-  providers = {
-    databricks = databricks.mws
-  }
-
-  workspace_id     = module.databricks_mws_workspace.workspace_id
-  workspace_access = var.admin_user
-
-#  depends_on = [module.unity_catalog_metastore_assignment, module.databricks_mws_workspace]
+# Cluster Version
+data "databricks_spark_version" "latest_lts" {
+  long_term_support = true
 }
 
-# Create Cluster
-module "cluster_configuration" {
-  source = "./modules/databricks_workspace/classic_cluster"
-  providers = {
-    databricks = databricks.created_workspace
+# Cluster Creation
+resource "databricks_cluster" "standard_classic_compute_plane_cluster" {
+  cluster_name            = "Standard Classic Compute Plane Cluster"
+  data_security_mode      = "SINGLE_USER"
+  spark_version           = data.databricks_spark_version.latest_lts.id
+  node_type_id            = "m6idn.xlarge"
+  autotermination_minutes = 10
+  autoscale {
+    min_workers = 1
+    max_workers = 2
   }
 
-  enable_compliance_security_profile = var.enable_compliance_security_profile
-  resource_prefix                    = var.resource_prefix
-  region                             = var.region
+  # Custom Tags
+  custom_tags = {
+    "SRA" = "Yes"
+  }
 
-  depends_on = [module.databricks_mws_workspace]
+  aws_attributes {
+    availability           = "SPOT"
+    zone_id                = "auto"
+    first_on_demand        = 1
+    spot_bid_price_percent = 100
+  }
 }

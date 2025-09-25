@@ -13,6 +13,21 @@ module "unity_catalog_metastore_creation" {
   metastore_exists = var.metastore_exists
 }
 
+# Create Service Principal for Metastore Management
+resource "databricks_service_principal" "uc_admin_sp" {
+  provider = databricks.mws
+  display_name = "Unity Catalog SP"
+}
+
+# Assign SP to Workspace Admin
+resource "databricks_grant" "metastore_management" {
+  provider = databricks.created_workspace
+  metastore = module.unity_catalog_metastore_creation.metastore_id
+  principal = databricks_service_principal.uc_admin_sp.application_id
+  privileges = ["CREATE_CATALOG", "CREATE_EXTERNAL_LOCATION"]
+  depends_on = [module.unity_catalog_metastore_assignment]
+}
+
 # Create Network Connectivity Connection Object
 module "network_connectivity_configuration" {
   source = "./modules/databricks_account/network_connectivity_configuration"
@@ -101,6 +116,20 @@ module "user_assignment" {
   depends_on = [module.unity_catalog_metastore_assignment, module.databricks_mws_workspace]
 }
 
+# Create Service Principal for Workspace Admin
+resource "databricks_service_principal" "workspace_admin_sp" {
+  provider = databricks.mws
+  display_name = "Workspace Admin SP"
+}
+
+# Assign SP to Workspace Admin
+resource "databricks_permission_assignment" "workspace_admin_sp" {
+  provider = databricks.created_workspace
+  permissions = ["ADMIN"]
+  principal_id = databricks_service_principal.workspace_admin_sp.id
+  depends_on = [module.databricks_mws_workspace]
+}
+
 # Audit Log Delivery
 module "log_delivery" {
   count  = var.audit_log_delivery_exists ? 0 : 1
@@ -117,26 +146,6 @@ module "log_delivery" {
 # =============================================================================
 # Databricks Workspace Modules
 # =============================================================================
-
-# Creates a Workspace Isolated Catalog
-# module "unity_catalog_catalog_creation" {
-#   source = "./modules/databricks_workspace/unity_catalog_catalog_creation"
-#   providers = {
-#     databricks = databricks.created_workspace
-#   }
-
-#   aws_account_id               = var.aws_account_id
-#   aws_iam_partition            = local.computed_aws_partition
-#   aws_assume_partition         = local.assume_role_partition
-#   unity_catalog_iam_arn        = local.unity_catalog_iam_arn
-#   resource_prefix              = var.resource_prefix
-#   uc_catalog_name              = "${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}"
-#   cmk_admin_arn                = var.cmk_admin_arn == null ? "arn:${local.computed_aws_partition}:iam::${var.aws_account_id}:root" : var.cmk_admin_arn
-#   workspace_id                 = module.databricks_mws_workspace.workspace_id
-#   user_workspace_catalog_admin = var.admin_user
-
-#   depends_on = [module.unity_catalog_metastore_assignment]
-# }
 
 # System Table Schemas Enablement
 module "system_table" {
@@ -183,46 +192,3 @@ module "compliance_security_profile" {
   compliance_standards = var.compliance_standards
 }
 
-# Create Create Cluster
-module "cluster_configuration" {
-  source = "./modules/databricks_workspace/classic_cluster"
-  providers = {
-    databricks = databricks.created_workspace
-  }
-
-  enable_compliance_security_profile = var.enable_compliance_security_profile
-  resource_prefix                    = var.resource_prefix
-  region                             = var.region
-
-  depends_on = [module.databricks_mws_workspace]
-}
-
-# =============================================================================
-# Security Analysis Tool  - PyPI must be enabled in network policy resource to function.
-# =============================================================================
-
-module "security_analysis_tool" {
-  count  = var.enable_security_analysis_tool && var.region != "us-gov-west-1" ? 1 : 0
-  source = "./modules/security_analysis_tool"
-
-  providers = {
-    databricks = databricks.created_workspace
-  }
-
-  # Authentication Variables
-  databricks_account_id = var.databricks_account_id
-  client_id             = null # Provide Workspace Admin ID
-  client_secret         = null # Provide Workspace Admin Secret
-
-  use_sp_auth = true
-
-  # Databricks Variables
-  analysis_schema_name = replace("${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}.SAT", "-", "_")
-  workspace_id         = module.databricks_mws_workspace.workspace_id
-
-  # Configuration Variables
-  proxies           = {}
-  run_on_serverless = true
-
-  depends_on = [module.unity_catalog_catalog_creation]
-}
