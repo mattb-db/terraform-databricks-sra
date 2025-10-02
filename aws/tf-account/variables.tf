@@ -146,29 +146,6 @@ variable "metastore_exists" {
   type        = bool
 }
 
-variable "network_configuration" {
-  description = "The type of network set-up for the workspace network configuration."
-  type        = string
-  nullable    = false
-
-  validation {
-    condition     = contains(["custom", "isolated"], var.network_configuration)
-    error_message = "Invalid network configuration. Allowed values are: custom, isolated."
-  }
-}
-
-# variable "private_subnets_cidr" {
-#   description = "CIDR blocks for private subnets."
-#   type        = list(string)
-#   nullable    = true
-# }
-
-# variable "privatelink_subnets_cidr" {
-#   description = "CIDR blocks for private link subnets."
-#   type        = list(string)
-#   nullable    = true
-# }
-
 variable "region" {
   description = "AWS region code. (e.g. us-east-1)"
   type        = string
@@ -345,11 +322,6 @@ variable "scc_relay_config" {
     }
   }
 }
-
-# variable "sg_egress_ports" {
-#   description = "List of egress ports for security groups."
-#   type        = list(string)
-# }
 
 variable "shared_datasets_bucket" {
   description = "Shared datasets bucket for VPC endpoint policy."

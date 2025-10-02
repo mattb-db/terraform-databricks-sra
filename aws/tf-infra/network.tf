@@ -20,10 +20,10 @@ module "vpc" {
   one_nat_gateway_per_az = false
   create_igw             = false
 
-  private_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-private-%s", var.infra_resource_prefix, az)]
+  private_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-private-%s", var.workspace_resource_prefix, az)]
   private_subnets      = var.private_subnets_cidr
 
-  intra_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-privatelink-%s", var.infra_resource_prefix, az)]
+  intra_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-privatelink-%s", var.workspace_resource_prefix, az)]
   intra_subnets      = var.privatelink_subnets_cidr
 
   tags = {
@@ -82,7 +82,7 @@ resource "aws_security_group" "sg" {
   }
 
   tags = {
-    Name    = "${var.infra_resource_prefix}-workspace-sg"
+    Name    = "${var.workspace_resource_prefix}-workspace-sg"
     Project = var.infra_resource_prefix
   }
   depends_on = [module.vpc]

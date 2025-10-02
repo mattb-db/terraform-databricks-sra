@@ -36,12 +36,7 @@ workspace_resource_prefix = ""
 # Network Configuration
 # -----------------------------------------------------------------------------
 
-# Network type: "custom". "isolated" is no longer supported as we're creating the VPC in a different module (see README.md for more information)
-network_configuration = "custom"
-
-# CUSTOM NETWORK CONFIGURATION
-# Required when using network_configuration = "custom"
-# Uncomment and configure the following variables for custom networking:
+# The following ids are output from the tf-infra module
 custom_vpc_id             = ""
 custom_private_subnet_ids = ["", ""]
 custom_sg_id              = ""

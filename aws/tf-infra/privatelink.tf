@@ -1,7 +1,7 @@
 # Security group for privatelink - skipped in custom operation mode
 
 resource "aws_security_group" "privatelink" {
-  name   = "${var.infra_resource_prefix}-privatelink-sg"
+  name   = "${var.workspace_resource_prefix}-privatelink-sg"
   vpc_id = module.vpc.vpc_id
 
   ingress {
@@ -56,7 +56,7 @@ resource "aws_security_group" "privatelink" {
   }
 
   tags = {
-    Name    = "${var.infra_resource_prefix}-privatelink-sg",
+    Name    = "${var.workspace_resource_prefix}-privatelink-sg",
     Project = var.infra_resource_prefix
   }
 }
@@ -315,7 +315,7 @@ module "vpc_endpoints" {
       route_table_ids = module.vpc.private_route_table_ids
       policy          = data.aws_iam_policy_document.s3_vpc_endpoint_policy.json
       tags = {
-        Name    = "${var.infra_resource_prefix}-s3-vpc-endpoint"
+        Name    = "${var.workspace_resource_prefix}-s3-vpc-endpoint"
         Project = var.infra_resource_prefix
       }
     },
@@ -325,7 +325,7 @@ module "vpc_endpoints" {
       subnet_ids          = module.vpc.intra_subnets
       policy              = data.aws_iam_policy_document.sts_vpc_endpoint_policy.json
       tags = {
-        Name    = "${var.infra_resource_prefix}-sts-vpc-endpoint"
+        Name    = "${var.workspace_resource_prefix}-sts-vpc-endpoint"
         Project = var.infra_resource_prefix
       }
     },
@@ -335,7 +335,7 @@ module "vpc_endpoints" {
       subnet_ids          = module.vpc.intra_subnets
       policy              = data.aws_iam_policy_document.kinesis_vpc_endpoint_policy.json
       tags = {
-        Name    = "${var.infra_resource_prefix}-kinesis-vpc-endpoint"
+        Name    = "${var.workspace_resource_prefix}-kinesis-vpc-endpoint"
         Project = var.infra_resource_prefix
       }
     }
@@ -352,7 +352,7 @@ resource "aws_vpc_endpoint" "backend_rest" {
   subnet_ids          = module.vpc.intra_subnets
   private_dns_enabled = true
   tags = {
-    Name    = "${var.infra_resource_prefix}-databricks-backend-rest"
+    Name    = "${var.workspace_resource_prefix}-databricks-backend-rest"
     Project = var.infra_resource_prefix
   }
 }
@@ -367,7 +367,7 @@ resource "aws_vpc_endpoint" "backend_relay" {
   subnet_ids          = module.vpc.intra_subnets
   private_dns_enabled = true
   tags = {
-    Name    = "${var.infra_resource_prefix}-databricks-backend-relay"
+    Name    = "${var.workspace_resource_prefix}-databricks-backend-relay"
     Project = var.infra_resource_prefix
   }
 }
