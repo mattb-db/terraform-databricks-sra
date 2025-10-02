@@ -37,3 +37,8 @@ variable "catalog_name" {
   description = "Catalog name"
   type        = string
 }
+
+variable "bucket_name" {
+  description = "Bucket name"
+  type        = string
+}

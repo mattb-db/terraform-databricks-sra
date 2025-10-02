@@ -45,3 +45,8 @@ variable "workspace_id" {
   description = "workspace ID of deployed workspace."
   type        = string
 }
+
+variable "bucket_name" {
+  description = "Bucket name"
+  type        = string
+}

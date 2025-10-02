@@ -15,6 +15,7 @@ module "unity_catalog_catalog_creation" {
   cmk_admin_arn                = "arn:aws:iam::${var.aws_account_id}:root"
   workspace_id                 = var.workspace_id
   user_workspace_catalog_admin = var.admin_user
+  bucket_name                  = var.bucket_name
 
 }
 
