@@ -32,3 +32,8 @@ variable "workspace_id" {
   description = "Workspace id"
   type        = string
 }
+
+variable "catalog_name" {
+  description = "Catalog name"
+  type        = string
+}

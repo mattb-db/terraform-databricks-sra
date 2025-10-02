@@ -11,7 +11,7 @@ module "unity_catalog_catalog_creation" {
   aws_assume_partition         = "aws"
   unity_catalog_iam_arn        = "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL"
   resource_prefix              = var.resource_prefix
-  uc_catalog_name              = "${var.resource_prefix}-catalog-${var.workspace_id}"
+  uc_catalog_name              = var.catalog_name
   cmk_admin_arn                = "arn:aws:iam::${var.aws_account_id}:root"
   workspace_id                 = var.workspace_id
   user_workspace_catalog_admin = var.admin_user

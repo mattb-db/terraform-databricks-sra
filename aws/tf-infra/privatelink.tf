@@ -1,16 +1,15 @@
 # Security group for privatelink - skipped in custom operation mode
 
 resource "aws_security_group" "privatelink" {
-  count  = var.network_configuration != "custom" ? 1 : 0
-  name   = "${var.resource_prefix}-privatelink-sg"
-  vpc_id = module.vpc[0].vpc_id
+  name   = "${var.infra_resource_prefix}-privatelink-sg"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     description     = "Databricks - PrivateLink Endpoint SG - REST API"
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg[0].id]
+    security_groups = [aws_security_group.sg.id]
   }
 
   dynamic "ingress" {
@@ -20,7 +19,7 @@ resource "aws_security_group" "privatelink" {
       from_port       = 6666
       to_port         = 6666
       protocol        = "tcp"
-      security_groups = [aws_security_group.sg[0].id]
+      security_groups = [aws_security_group.sg.id]
     }
   }
 
@@ -29,7 +28,7 @@ resource "aws_security_group" "privatelink" {
     from_port       = 2443
     to_port         = 2443
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg[0].id]
+    security_groups = [aws_security_group.sg.id]
   }
 
   ingress {
@@ -37,7 +36,7 @@ resource "aws_security_group" "privatelink" {
     from_port       = 8443
     to_port         = 8443
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg[0].id]
+    security_groups = [aws_security_group.sg.id]
   }
 
   ingress {
@@ -45,7 +44,7 @@ resource "aws_security_group" "privatelink" {
     from_port       = 8444
     to_port         = 8444
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg[0].id]
+    security_groups = [aws_security_group.sg.id]
   }
 
   ingress {
@@ -53,12 +52,12 @@ resource "aws_security_group" "privatelink" {
     from_port       = 8445
     to_port         = 8451
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg[0].id]
+    security_groups = [aws_security_group.sg.id]
   }
 
   tags = {
-    Name    = "${var.resource_prefix}-privatelink-sg",
-    Project = var.resource_prefix
+    Name    = "${var.infra_resource_prefix}-privatelink-sg",
+    Project = var.infra_resource_prefix
   }
 }
 
@@ -66,7 +65,6 @@ resource "aws_security_group" "privatelink" {
 
 # Restrictive S3 endpoint policy:
 data "aws_iam_policy_document" "s3_vpc_endpoint_policy" {
-  count = var.network_configuration != "custom" ? 1 : 0
 
   statement {
     sid    = "Grant access to Workspace Root Bucket"
@@ -86,8 +84,8 @@ data "aws_iam_policy_document" "s3_vpc_endpoint_policy" {
     }
 
     resources = [
-      "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-workspace-root-storage/*",
-      "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-workspace-root-storage"
+      "arn:${local.computed_aws_partition}:s3:::${var.workspace_resource_prefix}-workspace-root-storage/*",
+      "arn:${local.computed_aws_partition}:s3:::${var.workspace_resource_prefix}-workspace-root-storage"
     ]
 
     condition {
@@ -111,13 +109,16 @@ data "aws_iam_policy_document" "s3_vpc_endpoint_policy" {
 
     principals {
       type        = "AWS"
-      identifiers = ["*"]
+      identifiers = ["*"] 
     }
 
-    resources = [
-      "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}/*",
-      "arn:${local.computed_aws_partition}:s3:::${var.resource_prefix}-catalog-${module.databricks_mws_workspace.workspace_id}"
-    ]
+    # Grant access to catalogs in S3
+    resources = flatten([
+      for catalog in var.catalogs : [
+        "arn:${local.computed_aws_partition}:s3:::${catalog}/*",
+        "arn:${local.computed_aws_partition}:s3:::${catalog}"
+      ]
+    ])
 
     condition {
       test     = "StringEquals"
@@ -243,7 +244,6 @@ data "aws_iam_policy_document" "s3_vpc_endpoint_policy" {
 
 # Restrictive STS endpoint policy:
 data "aws_iam_policy_document" "sts_vpc_endpoint_policy" {
-  count = var.network_configuration != "custom" ? 1 : 0
 
   statement {
     actions = [
@@ -283,7 +283,6 @@ data "aws_iam_policy_document" "sts_vpc_endpoint_policy" {
 
 # Restrictive Kinesis endpoint policy:
 data "aws_iam_policy_document" "kinesis_vpc_endpoint_policy" {
-  count = var.network_configuration != "custom" ? 1 : 0
   statement {
     actions = [
       "kinesis:PutRecord",
@@ -302,43 +301,42 @@ data "aws_iam_policy_document" "kinesis_vpc_endpoint_policy" {
 
 # VPC endpoint creation - Skipped in custom operation mode
 module "vpc_endpoints" {
-  count = var.network_configuration != "custom" ? 1 : 0
 
   source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
   version = "3.11.0"
 
-  vpc_id             = module.vpc[0].vpc_id
-  security_group_ids = [aws_security_group.privatelink[0].id]
+  vpc_id             = module.vpc.vpc_id
+  security_group_ids = [aws_security_group.privatelink.id]
 
   endpoints = {
     s3 = {
       service         = "s3"
       service_type    = "Gateway"
-      route_table_ids = module.vpc[0].private_route_table_ids
-      policy          = data.aws_iam_policy_document.s3_vpc_endpoint_policy[0].json
+      route_table_ids = module.vpc.private_route_table_ids
+      policy          = data.aws_iam_policy_document.s3_vpc_endpoint_policy.json
       tags = {
-        Name    = "${var.resource_prefix}-s3-vpc-endpoint"
-        Project = var.resource_prefix
+        Name    = "${var.infra_resource_prefix}-s3-vpc-endpoint"
+        Project = var.infra_resource_prefix
       }
     },
     sts = {
       service             = "sts"
       private_dns_enabled = true
-      subnet_ids          = module.vpc[0].intra_subnets
-      policy              = data.aws_iam_policy_document.sts_vpc_endpoint_policy[0].json
+      subnet_ids          = module.vpc.intra_subnets
+      policy              = data.aws_iam_policy_document.sts_vpc_endpoint_policy.json
       tags = {
-        Name    = "${var.resource_prefix}-sts-vpc-endpoint"
-        Project = var.resource_prefix
+        Name    = "${var.infra_resource_prefix}-sts-vpc-endpoint"
+        Project = var.infra_resource_prefix
       }
     },
     kinesis-streams = {
       service             = "kinesis-streams"
       private_dns_enabled = true
-      subnet_ids          = module.vpc[0].intra_subnets
-      policy              = data.aws_iam_policy_document.kinesis_vpc_endpoint_policy[0].json
+      subnet_ids          = module.vpc.intra_subnets
+      policy              = data.aws_iam_policy_document.kinesis_vpc_endpoint_policy.json
       tags = {
-        Name    = "${var.resource_prefix}-kinesis-vpc-endpoint"
-        Project = var.resource_prefix
+        Name    = "${var.infra_resource_prefix}-kinesis-vpc-endpoint"
+        Project = var.infra_resource_prefix
       }
     }
   }
@@ -346,32 +344,30 @@ module "vpc_endpoints" {
 
 # Databricks REST endpoint - skipped in custom operation mode
 resource "aws_vpc_endpoint" "backend_rest" {
-  count = var.network_configuration != "custom" ? 1 : 0
 
-  vpc_id              = module.vpc[0].vpc_id
+  vpc_id              = module.vpc.vpc_id
   service_name        = var.databricks_gov_shard == "dod" ? var.workspace_config[var.region].secondary_endpoint : var.workspace_config[var.region].primary_endpoint
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.privatelink[0].id]
-  subnet_ids          = module.vpc[0].intra_subnets
+  security_group_ids  = [aws_security_group.privatelink.id]
+  subnet_ids          = module.vpc.intra_subnets
   private_dns_enabled = true
   tags = {
-    Name    = "${var.resource_prefix}-databricks-backend-rest"
-    Project = var.resource_prefix
+    Name    = "${var.infra_resource_prefix}-databricks-backend-rest"
+    Project = var.infra_resource_prefix
   }
 }
 
 # Databricks SCC endpoint - skipped in custom operation mode
 resource "aws_vpc_endpoint" "backend_relay" {
-  count = var.network_configuration != "custom" ? 1 : 0
 
-  vpc_id              = module.vpc[0].vpc_id
+  vpc_id              = module.vpc.vpc_id
   service_name        = var.databricks_gov_shard == "dod" ? var.scc_relay_config[var.region].secondary_endpoint : var.scc_relay_config[var.region].primary_endpoint
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.privatelink[0].id]
-  subnet_ids          = module.vpc[0].intra_subnets
+  security_group_ids  = [aws_security_group.privatelink.id]
+  subnet_ids          = module.vpc.intra_subnets
   private_dns_enabled = true
   tags = {
-    Name    = "${var.resource_prefix}-databricks-backend-relay"
-    Project = var.resource_prefix
+    Name    = "${var.infra_resource_prefix}-databricks-backend-relay"
+    Project = var.infra_resource_prefix
   }
 }

@@ -7,16 +7,16 @@ data "databricks_aws_assume_role_policy" "this" {
 }
 
 resource "aws_iam_role" "cross_account_role" {
-  name               = "${var.resource_prefix}-cross-account"
+  name               = "${var.account_resource_prefix}-cross-account"
   assume_role_policy = data.databricks_aws_assume_role_policy.this.json
   tags = {
-    Name    = "${var.resource_prefix}-cross-account"
-    Project = var.resource_prefix
+    Name    = "${var.account_resource_prefix}-cross-account"
+    Project = var.account_resource_prefix
   }
 }
 
 resource "aws_iam_role_policy" "cross_account" {
-  name = "${var.resource_prefix}-crossaccount-policy"
+  name = "${var.account_resource_prefix}-crossaccount-policy"
   role = aws_iam_role.cross_account_role.id
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -237,7 +237,7 @@ resource "aws_iam_role_policy" "cross_account" {
         ],
         "Condition" : {
           "StringEqualsIfExists" : {
-            "ec2:vpc" : "arn:${local.computed_aws_partition}:ec2:${var.region}:${var.aws_account_id}:vpc/${var.custom_vpc_id != null ? var.custom_vpc_id : module.vpc[0].vpc_id}"
+            "ec2:vpc" : "arn:${local.computed_aws_partition}:ec2:${var.region}:${var.aws_account_id}:vpc/${var.custom_vpc_id}"
           }
         }
       },
@@ -265,17 +265,17 @@ resource "aws_iam_role_policy" "cross_account" {
           "ec2:RevokeSecurityGroupEgress",
           "ec2:RevokeSecurityGroupIngress"
         ],
-        "Resource" : "arn:${local.computed_aws_partition}:ec2:${var.region}:${var.aws_account_id}:security-group/${var.custom_sg_id != null ? var.custom_sg_id : aws_security_group.sg[0].id}",
+        "Resource" : "arn:${local.computed_aws_partition}:ec2:${var.region}:${var.aws_account_id}:security-group/${var.custom_sg_id}",
         "Condition" : {
           "StringEquals" : {
-            "ec2:vpc" : "arn:${local.computed_aws_partition}:ec2:${var.region}:${var.aws_account_id}:vpc/${var.custom_vpc_id != null ? var.custom_vpc_id : module.vpc[0].vpc_id}"
+            "ec2:vpc" : "arn:${local.computed_aws_partition}:ec2:${var.region}:${var.aws_account_id}:vpc/${var.custom_vpc_id}"
           }
         }
       }
     ]
     }
   )
-  depends_on = [
-    module.vpc, aws_security_group.sg
-  ]
+  # depends_on = [
+  #   module.vpc, aws_security_group.sg
+  # ]
 }

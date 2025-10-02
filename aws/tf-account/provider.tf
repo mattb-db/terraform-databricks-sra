@@ -21,7 +21,7 @@ provider "aws" {
   region = var.region
   default_tags {
     tags = {
-      Resource = var.resource_prefix
+      Resource = var.account_resource_prefix
     }
   }
 }

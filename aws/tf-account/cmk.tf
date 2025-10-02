@@ -1,4 +1,5 @@
 # EXPLANATION: The customer-managed keys for workspace and managed services
+# Databricks does recommend setting up a customer-managed key (CMK) on a per-workspace basis, especially for compliance or isolation needs, but it is not always a strict requirement.
 
 locals {
   cmk_admin_value = var.cmk_admin_arn == null ? "arn:${local.computed_aws_partition}:iam::${var.aws_account_id}:root" : var.cmk_admin_arn
@@ -63,14 +64,14 @@ resource "aws_kms_key" "workspace_storage" {
   depends_on = [aws_iam_role.cross_account_role]
 
   tags = {
-    Name    = "${var.resource_prefix}-workspace-storage-key"
-    Project = var.resource_prefix
+    Name    = "${var.workspace_resource_prefix}-workspace-storage-key"
+    Project = var.workspace_resource_prefix
   }
 }
 
 
 resource "aws_kms_alias" "workspace_storage_key_alias" {
-  name          = "alias/${var.resource_prefix}-workspace-storage-key"
+  name          = "alias/${var.workspace_resource_prefix}-workspace-storage-key"
   target_key_id = aws_kms_key.workspace_storage.id
 }
 
@@ -112,12 +113,12 @@ resource "aws_kms_key" "managed_services" {
   )
 
   tags = {
-    Project = var.resource_prefix
-    Name    = "${var.resource_prefix}-managed-services-key"
+    Project = var.workspace_resource_prefix
+    Name    = "${var.workspace_resource_prefix}-managed-services-key"
   }
 }
 
 resource "aws_kms_alias" "managed_services_key_alias" {
-  name          = "alias/${var.resource_prefix}-managed-services-key"
+  name          = "alias/${var.workspace_resource_prefix}-managed-services-key"
   target_key_id = aws_kms_key.managed_services.key_id
 }
