@@ -21,7 +21,7 @@ provider "aws" {
   region = var.region
   default_tags {
     tags = {
-      Resource = var.account_resource_prefix
+      Resource = var.resource_prefix
     }
   }
 }
@@ -31,13 +31,7 @@ provider "aws" {
 # export DATABRICKS_CLIENT_SECRET=CLIENT_SECRET
 
 provider "databricks" {
-  alias      = "mws"
-  host       = local.computed_databricks_provider_host
-  account_id = var.databricks_account_id
-}
-
-provider "databricks" {
-  alias      = "created_workspace"
-  host       = module.databricks_mws_workspace.workspace_url
-  account_id = var.databricks_account_id
+  alias      = "current_workspace"
+  host       = var.workspace_url
+#  account_id = var.databricks_account_id
 }

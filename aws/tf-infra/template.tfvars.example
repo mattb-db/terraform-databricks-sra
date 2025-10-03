@@ -1,0 +1,41 @@
+# =============================================================================
+# Configuration Variables for AWS and Databricks
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# AWS Variables
+# -----------------------------------------------------------------------------
+
+# AWS account ID where resources will be deployed
+aws_account_id = ""
+
+# AWS region for deployment
+region = ""
+
+# -----------------------------------------------------------------------------
+# Resource Configuration
+# -----------------------------------------------------------------------------
+
+# Prefix used for naming and tagging infrastructure specific resources (VPC)
+infra_resource_prefix = ""
+
+# Prefix used for naming and tagging workspace specific resources (Security Groups, PrivateLink)
+workspace_resource_prefix = ""
+
+# -----------------------------------------------------------------------------
+# Network Configuration
+# -----------------------------------------------------------------------------
+
+vpc_cidr_range           = "10.0.0.0/18"
+private_subnets_cidr     = ["10.0.0.0/22", "10.0.4.0/22", "10.0.8.0/22"]
+privatelink_subnets_cidr = ["10.0.28.0/26", "10.0.28.64/26", "10.0.28.128/26"]
+sg_egress_ports          = [443, 2443, 6666, 8443, 8444, 8445, 8446, 8447, 8448, 8449, 8450, 8451]
+
+# -----------------------------------------------------------------------------
+# Catalog Configuration
+# -----------------------------------------------------------------------------
+
+# S3 bucket names of catalogs accessed by the workspace
+# These are needed so we can apply the policy to the S3 gateway endpoint granting access
+# As more catalogs are added, more S3 buckets will need to be added here, assuming one S3 bucket is assigned per catalog
+catalogs = [ "Catalog_A", "Catalog_B" ]

@@ -1,0 +1,42 @@
+# =============================================================================
+# Configuration Variables for AWS and Databricks
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# AWS Variables
+# -----------------------------------------------------------------------------
+
+# AWS account ID where resources will be deployed
+aws_account_id = ""
+
+# AWS region for deployment
+region = ""
+
+# -----------------------------------------------------------------------------
+# Databricks Variables
+# -----------------------------------------------------------------------------
+
+# Databricks account ID
+databricks_account_id = ""
+
+# Databricks workspace URL
+workspace_url = ""
+
+# Catalog admin user (owner)
+admin_user = ""
+
+# Workspace id
+workspace_id = ""
+
+# Catalog name
+catalog_name = ""
+
+# Bucket Name
+bucket_name = ""
+
+# -----------------------------------------------------------------------------
+# Resource Configuration
+# -----------------------------------------------------------------------------
+
+# Prefix used for naming and tagging resources for the catalog (e.g., S3 buckets, IAM roles)
+resource_prefix = ""

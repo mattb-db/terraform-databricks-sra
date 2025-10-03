@@ -5,13 +5,12 @@ data "aws_prefix_list" "s3" {
   name = "com.amazonaws.${var.region}.s3"
 }
 
-# VPC and other assets - skipped entirely in custom mode, some assets skipped for firewall and isolated
+# VPC and other assets
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.1"
-  count   = var.network_configuration != "custom" ? 1 : 0
 
-  name = "${var.resource_prefix}-classic-compute-plane-vpc"
+  name = "${var.infra_resource_prefix}-classic-compute-plane-vpc"
   cidr = var.vpc_cidr_range
   azs  = data.aws_availability_zones.available.names
 
@@ -21,23 +20,21 @@ module "vpc" {
   one_nat_gateway_per_az = false
   create_igw             = false
 
-  private_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-private-%s", var.resource_prefix, az)]
+  private_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-private-%s", var.workspace_resource_prefix, az)]
   private_subnets      = var.private_subnets_cidr
 
-  intra_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-privatelink-%s", var.resource_prefix, az)]
+  intra_subnet_names = [for az in data.aws_availability_zones.available.names : format("%s-privatelink-%s", var.workspace_resource_prefix, az)]
   intra_subnets      = var.privatelink_subnets_cidr
 
   tags = {
-    Project = var.resource_prefix
+    Project = var.infra_resource_prefix
   }
 }
 
-
-# Security group - skipped in custom mode
+# Security group 
 resource "aws_security_group" "sg" {
-  count  = var.network_configuration != "custom" ? 1 : 0
-  name   = "${var.resource_prefix}-workspace-sg"
-  vpc_id = module.vpc[0].vpc_id
+  name   = "${var.infra_resource_prefix}-workspace-sg"
+  vpc_id = module.vpc.vpc_id
 
 
   dynamic "ingress" {
@@ -63,7 +60,7 @@ resource "aws_security_group" "sg" {
   }
 
   dynamic "egress" {
-    for_each = var.databricks_gov_shard == "civilian" || var.databricks_gov_shard == "dod" ? [for port in var.sg_egress_ports : port if port != 6666] : var.sg_egress_ports
+    for_each = var.sg_egress_ports
     content {
       description = "Databricks - Workspace SG - REST (443), Secure Cluster Connectivity (2443/6666), Compute Plane to Control Plane Internal Calls (8443), Unity Catalog Logging and Lineage Data Streaming (8444), Future Extendability (8445-8451)"
       from_port   = egress.value
@@ -74,7 +71,7 @@ resource "aws_security_group" "sg" {
   }
 
   dynamic "egress" {
-    for_each = var.network_configuration != "custom" ? [1] : []
+    for_each = [1]
     content {
       description     = "S3 Gateway Endpoint - SG"
       from_port       = 443
@@ -85,8 +82,8 @@ resource "aws_security_group" "sg" {
   }
 
   tags = {
-    Name    = "${var.resource_prefix}-workspace-sg"
-    Project = var.resource_prefix
+    Name    = "${var.workspace_resource_prefix}-workspace-sg"
+    Project = var.infra_resource_prefix
   }
   depends_on = [module.vpc]
 }

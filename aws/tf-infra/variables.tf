@@ -1,8 +1,3 @@
-variable "admin_user" {
-  description = "Email of the admin user for the workspace and workspace catalog."
-  type        = string
-}
-
 variable "artifact_storage_bucket" {
   description = "Artifact storage bucket for VPC endpoint policy."
   type        = map(list(string))
@@ -27,12 +22,6 @@ variable "artifact_storage_bucket" {
   }
 }
 
-variable "audit_log_delivery_exists" {
-  description = "If audit log delivery is already configured"
-  type        = bool
-  default     = false
-}
-
 variable "aws_account_id" {
   description = "ID of the AWS account."
   type        = string
@@ -54,12 +43,6 @@ variable "cmk_admin_arn" {
   description = "Amazon Resource Name (ARN) of the CMK admin."
   type        = string
   default     = null
-}
-
-variable "compliance_standards" {
-  description = "List of compliance standards."
-  type        = list(string)
-  nullable    = true
 }
 
 variable "custom_private_subnet_ids" {
@@ -92,12 +75,6 @@ variable "custom_workspace_vpce_id" {
   default     = null
 }
 
-variable "databricks_account_id" {
-  description = "ID of the Databricks account."
-  type        = string
-  sensitive   = true
-}
-
 variable "databricks_gov_shard" {
   description = "Databricks GovCloud shard type (civilian or dod). Only applicable for us-gov-west-1 region."
   type        = string
@@ -120,30 +97,16 @@ variable "databricks_provider_host" {
   }
 }
 
-variable "deployment_name" {
-  description = "Deployment name for the workspace. Must first be enabled by a Databricks representative."
-  default     = null
-  type        = string
+variable "private_subnets_cidr" {
+  description = "CIDR blocks for private subnets."
+  type        = list(string)
   nullable    = true
 }
 
-variable "enable_compliance_security_profile" {
-  description = "Flag to enable the compliance security profile."
-  type        = bool
-  sensitive   = true
-  default     = false
-}
-
-variable "enable_security_analysis_tool" {
-  description = "Flag to enable the security analysis tool."
-  type        = bool
-  sensitive   = true
-  default     = false
-}
-
-variable "metastore_exists" {
-  description = "If a metastore exists"
-  type        = bool
+variable "privatelink_subnets_cidr" {
+  description = "CIDR blocks for private link subnets."
+  type        = list(string)
+  nullable    = true
 }
 
 variable "region" {
@@ -229,12 +192,12 @@ variable "region_name_config" {
   }
 }
 
-variable "account_resource_prefix" {
+variable "infra_resource_prefix" {
   description = "Prefix for the resource names."
   type        = string
 
   validation {
-    condition     = can(regex("^[a-z0-9-.]{1,26}$", var.account_resource_prefix))
+    condition     = can(regex("^[a-z0-9-.]{1,26}$", var.infra_resource_prefix))
     error_message = "Invalid resource prefix. Allowed 40 characters containing only a-z, 0-9, -, ."
   }
 }
@@ -247,6 +210,11 @@ variable "workspace_resource_prefix" {
     condition     = can(regex("^[a-z0-9-.]{1,26}$", var.workspace_resource_prefix))
     error_message = "Invalid resource prefix. Allowed 40 characters containing only a-z, 0-9, -, ."
   }
+}
+
+variable "catalogs" {
+  description = "List of catalogs accessed by the workspace."
+  type        = list(string)
 }
 
 # Secure Cluster Connectivity Relay configuration
@@ -321,6 +289,11 @@ variable "scc_relay_config" {
       region_type        = "govcloud"
     }
   }
+}
+
+variable "sg_egress_ports" {
+  description = "List of egress ports for security groups."
+  type        = list(string)
 }
 
 variable "shared_datasets_bucket" {
@@ -495,10 +468,10 @@ variable "log_storage_bucket_config" {
   }
 }
 
-# variable "vpc_cidr_range" {
-#   description = "CIDR range for the VPC."
-#   type        = string
-# }
+variable "vpc_cidr_range" {
+  description = "CIDR range for the VPC."
+  type        = string
+}
 
 # Workspace API PrivateLink Endpoint configuration
 # This variable allows mapping regions to multiple endpoint properties:
